@@ -48,7 +48,7 @@ var addEditor = function(){
 }
 
 var addRow = function(){
-    var lastRow = $("#translationFields tr:last").clone();
+    var lastRow = $("#translationFields tbody tr:last").clone();
     var tinymceDiv = lastRow.find('.mce-tinymce').remove();
     var lastTranslationCount =  lastRow.data('translation-number');
     lastTranslationCount += 1;
@@ -58,7 +58,7 @@ var addRow = function(){
     selectBox.attr('name', 'source[translations_attributes]['+ (lastTranslationCount+1)+'][language]');
     selectBox.attr('id', 'source_translations_attributes_'+ (lastTranslationCount+1)+'_language');
 
-    var textArea = lastRow.find('td textarea');
+    var textArea = lastRow.find('td textarea').val('');
     textArea.attr('name', 'source[translations_attributes]['+ (lastTranslationCount+1)+'][text]');
     textArea.attr('id', 'source_translations_attributes_'+ (lastTranslationCount+1)+'_text');
     textArea.show();
@@ -73,15 +73,29 @@ var addRow = function(){
 
 var removeRow = function(){
   $('#translationFields').on('click', '.remove', function(){
-    $(this).parent().parent().remove();
-     $('.languageSelect').selectunique('refresh');
+    // TODO Need to add Confirm/Canel button and conditions here.
+    var confirmation = confirm('Are you sure you want to delete this translation?');
+    if (confirmation == true) {
+      $.ajax({
+        // TODO The targeting here needs to be fixed.
+        url: '/translations/' + $(this).parent().parent().prev('input').val(),
+        type: 'DELETE',
+        success: function(response) {
+          // TODO Add success action here.
+          alert('Success!!!');
+        }
+      });
+      //alert($(this).parent().parent().prev('input').val());
+      $(this).parent().parent().remove();
+      $('.languageSelect').selectunique('refresh');
+    }
   });
 }
 var ready = function(){
 
   $('.languageSelect').selectunique();
   numberTranslations = 0;
-  $('#translationFields').on('click', '.addMore', function(){
+  $('.addMore').click(function(){
     mceEnabled = checkMceEnabled();
     addRow();
   });
