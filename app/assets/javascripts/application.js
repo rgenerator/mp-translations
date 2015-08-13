@@ -11,12 +11,12 @@ var editorHandler = function() {
     e.preventDefault();
     var $editor = $('.editor'), $textareas = $('textarea').not('#source_text');
     if ($editor.hasClass('enabled')) {
-	    $editor.removeClass('enabled');
-	    $editor.addClass('disabled');
+      $editor.removeClass('enabled');
+      $editor.addClass('disabled');
 
-	    $textareas.each(function() {
-	      tinymce.execCommand('mceRemoveEditor', false, $(this).attr('id'));
-	    });
+      $textareas.each(function() {
+        tinymce.execCommand('mceRemoveEditor', false, $(this).attr('id'));
+      });
     }
     else {
       $editor.removeClass('disabled');
@@ -24,7 +24,7 @@ var editorHandler = function() {
 
       $textareas.each(function() {
         tinymce.execCommand('mceAddEditor', false, $(this).attr('id'));
-	    });
+      });
     }
   });
 }
