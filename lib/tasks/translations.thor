@@ -1,6 +1,6 @@
 # -*- encoding : utf-8 -*-
+require 'csv_importer'
 
-# Thor task for exporting PO file
 class Translations < Thor
   require './config/environment.rb'
 
@@ -25,48 +25,18 @@ class Translations < Thor
     end
   end
 
-  desc "import <csv_file>", "create translations from CSV file of product text"
+  desc "import <csv_file>", "create sources and translations from the given CSV file"
   def import(csv_file)
-    CSV.foreach(csv_file, headers: true, skip_blanks: true) do |row|
-      languages = row.headers.dup
-      languages.shift unless languages.first == 'en'
-
-      source_language = languages.shift
-      next unless row[source_language].present?
-
-      source = Source.new
-      source.language = source_language.gsub(/_/,'-')
-
-      if /^\s*$/.match(row[source_language])
-	source.text = html_paragraphs(row[source_language])
-      else
-	source.text = row[source_language]
-      end
-
-      languages.each do |lang|
-	t = Translation.new
-	t.language = lang.dup
-	if /^\s*$/.match(row[lang])
-	  t.text = html_paragraphs(row[lang])
-	else
-	  t.text = row[lang]
-	end
-	source.translations << t
-      end
-
-      begin
-	source.save!
-      rescue ActiveRecord::RecordNotUnique, ActiveRecord::RecordInvalid => e
-	warn "Error, row #{$.}: #{e}"
-      end
+    errors = CSVImporter.new.import(csv_file)
+    if errors.none?
+      puts "Import succeeded."
+    else
+      printf "Import resulted in %s %s.\n", errors.size, "error".pluralize(errors.size)
+      errors.each { |error| printf "Row: %d, error: %s\n", error.row, error.message }
     end
   end
 
   no_tasks do
-    def html_paragraphs(text)
-      sprintf "<p>%s</p>", text.split(/^\s*$/).map(&:strip).join("</p><p>")
-    end
-
     def check_language(language)
       raise UnsupportedLanguageError unless Source.supported_languages.include?(language)
     end
