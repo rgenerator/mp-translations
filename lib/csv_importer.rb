@@ -28,7 +28,7 @@ class CSVImporter
   end
 
   def import_row(row)
-    languages = row.headers.dup
+    languages = row.headers.dup.reject(&:nil?)
     languages.shift unless languages.first == 'en'
 
     source_language = languages.shift
