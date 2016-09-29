@@ -6,28 +6,26 @@
 //= require tinymce
 //= require_tree .
 
-var editorHandler = function(){
+var editorHandler = function() {
   $('.editor .btn').click(function(e) {
-      e.preventDefault();
+    e.preventDefault();
+    var $editor = $('.editor'), $textareas = $('textarea').not('#source_text');
+    if ($editor.hasClass('enabled')) {
+      $editor.removeClass('enabled');
+      $editor.addClass('disabled');
 
-      var $editor = $('.editor'), $textareas = $('textarea');
+      $textareas.each(function() {
+        tinymce.execCommand('mceRemoveEditor', false, $(this).attr('id'));
+      });
+    }
+    else {
+      $editor.removeClass('disabled');
+      $editor.addClass('enabled');
 
-      if($editor.hasClass('enabled')) {
-	$editor.removeClass('enabled');
-	$editor.addClass('disabled');
-
-	$textareas.each(function() {
-	  tinymce.execCommand('mceRemoveEditor', false, $(this).attr('id'));
-	});
-      }
-      else {
-	$editor.removeClass('disabled');
-	$editor.addClass('enabled');
-
-	$textareas.each(function() {
-	  tinymce.execCommand('mceAddEditor', false, $(this).attr('id'));
-	});
-      }
+      $textareas.each(function() {
+        tinymce.execCommand('mceAddEditor', false, $(this).attr('id'));
+      });
+    }
   });
 }
 
@@ -46,20 +44,19 @@ var addRow = function() {
   textArea.attr('name', 'source[translations_attributes]['+ rowNumber +'][text]');
   textArea.attr('id', 'source_translations_attributes_'+ rowNumber + '_text');
 
+  $('#translationFields tbody').append(newRow);
 
-    $('#translationFields tbody').append(newRow);
-
-    if($('.editor').hasClass('enabled')) {
-	var id = textArea.attr('id');
-	// Must be in the DOM to work
-	tinymce.execCommand('mceAddEditor', false, id);
-	tinymce.execCommand('mceFocus', false, id);
-    }
+  if ($('.editor').hasClass('enabled')) {
+    var id = textArea.attr('id');
+    // Must be in the DOM to work
+    tinymce.execCommand('mceAddEditor', false, id);
+    tinymce.execCommand('mceFocus', false, id);
+  }
 
   $('select[id$=_language]').selectunique('refresh');
 };
 
-var rowHandler = function(){
+var rowHandler = function() {
   $('body').on('click', '.translation .remove', function(e) {
     e.preventDefault();
 
@@ -68,7 +65,7 @@ var rowHandler = function(){
   });
 }
 
-var ready = function(){
+var ready = function() {
   $('select[id$=_language]').selectunique();
   $('body').on('click', '.add-translation', function(e) {
     e.preventDefault();
